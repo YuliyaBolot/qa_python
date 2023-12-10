@@ -27,12 +27,10 @@ class TestBooksCollector:
     # напиши свои тесты ниже
     # чтобы тесты были независимыми в каждом из них создавай отдельный экземпляр класса BooksCollector()
 
-    def test_filling_dictionary_true(self):
+    def test_fillings_dictionary_true(self):
         collector = BooksCollector()
         collector.add_new_book('Мор, ученик Смерти')
-        collector.set_book_genre('Мор, ученик Смерти', 'Фантастика')
-        book = {'Мор, ученик Смерти': 'Фантастика'}
-        assert collector.books_genre == book
+        assert collector.get_books_genre() == {'Мор, ученик Смерти': ''}
 
     @pytest.mark.parametrize('name', ['', 'Я не могу придумать книгу с таким именем!'])
     def test_add_new_book_do_not_add_books(self, name):
@@ -40,11 +38,17 @@ class TestBooksCollector:
         collector.add_new_book(name)
         assert len(collector.get_books_genre()) == 0
 
+    @pytest.mark.parametrize('name', ['Я', 'Маленькие тролли и большое наводнение..', 'Я не могу придумать книгу с таким именем'])
+    def test_add_new_book_add_books_with_different_name_length(self, name):
+        collector = BooksCollector()
+        collector.add_new_book(name)
+        assert collector.get_books_genre() == {name: ''}
+
     def test_add_new_book_try_add_existed_book(self):
         collector = BooksCollector()
         collector.books_genre = {'Мор, ученик Смерти': ''}
         collector.add_new_book('Мор, ученик Смерти')
-        assert len(collector.get_books_genre()) == 1
+        assert collector.get_books_genre() == {'Мор, ученик Смерти': ''}
 
     def test_set_book_genre(self):
         collector = BooksCollector()
@@ -61,39 +65,40 @@ class TestBooksCollector:
     def test_get_books_with_specific_genre_add_book_to_list(self):
         collector = BooksCollector()
         collector.books_genre = {'Сияние': 'Ужасы', 'Приключение Незнайки и его друзей': 'Мультфильмы', 'Чужак': 'Ужасы'}
-        assert len(collector.get_books_with_specific_genre('Ужасы')) == 2
+        assert collector.get_books_with_specific_genre('Ужасы')[:] == ['Сияние', 'Чужак']
 
     def test_get_books_for_children_add_child_book(self):
         collector = BooksCollector()
         collector.books_genre = {'Сияние': 'Ужасы', 'Приключение Незнайки и его друзей': 'Мультфильмы',
                                  'Приключение Алисы': 'Фантастика', 'Убийство в Восточном экспрессе': 'Детективы', 'Медвежонок Паддингтон': 'Комедии' }
-        assert len(collector.get_books_for_children()) == 3
+        assert collector.get_books_for_children()[:] == ['Приключение Незнайки и его друзей', 'Приключение Алисы', 'Медвежонок Паддингтон']
 
-    def test_add_book_in_favorites_add_two_favourite_books(self):
+    def test_add_book_in_favorites(self):
         collector = BooksCollector()
         collector.books_genre = {'Маленький принц': 'Фантастика', 'Убийство в Восточном экспрессе': 'Детективы'}
         collector.add_book_in_favorites('Маленький принц')
-        collector.add_book_in_favorites('Убийство в Восточном экспрессе')
-        assert len(collector.get_list_of_favorites_books()) == 2
+        assert collector.get_list_of_favorites_books()[:] == ['Маленький принц']
+
 
     def test_add_book_in_favorites_try_to_add_repeat_book(self):
         collector = BooksCollector()
-        collector.favorites = ['Маленький принц', 'Убийство в Восточном экспрессе']
-        collector.books_genre = {'Маленький принц': 'Фантастика', 'Убийство в Восточном экспрессе': 'Детективы'}
+        collector.add_new_book('Маленький принц')
         collector.add_book_in_favorites('Маленький принц')
-        assert len(collector.get_list_of_favorites_books()) == 2
+        collector.add_book_in_favorites('Маленький принц')
+        assert collector.get_list_of_favorites_books()[:] == ['Маленький принц']
 
     def test_add_book_in_favorites_try_to_add_book_which_not_in_dictionary(self):
         collector = BooksCollector()
-        collector.favorites = ['Маленький принц', 'Убийство в Восточном экспрессе']
         collector.books_genre = {'Маленький принц': 'Фантастика', 'Убийство в Восточном экспрессе': 'Детективы'}
         collector.add_book_in_favorites('Приключение Алисы')
-        assert len(collector.get_list_of_favorites_books()) == 2
+        assert collector.get_list_of_favorites_books()[:] == []
+
     def test_delete_book_from_favorites_list(self):
         collector = BooksCollector()
-        collector.favorites = ['Маленькие женщины', 'Убийство в Восточном экспрессе', 'Приключение Алисы']
+        collector.add_new_book('Убийство в Восточном экспрессе')
+        collector.add_book_in_favorites('Убийство в Восточном экспрессе')
         collector.delete_book_from_favorites('Убийство в Восточном экспрессе')
-        assert len(collector.get_list_of_favorites_books()) == 2
+        assert collector.get_list_of_favorites_books()[:] == []
 
 
 
